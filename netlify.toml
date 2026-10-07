@@ -1,7 +1,3 @@
-# ============================================
-# Netlify Configuration - Ali App
-# ============================================
-
 [build]
   publish = "public"
   functions = "netlify/functions"
@@ -9,14 +5,18 @@
 [build.environment]
   NODE_VERSION = "20"
 
-# إعادة توجيه جميع الطلبات إلى index.html
-# (ما عدا الملفات الثابتة والدوال)
+# ⚠️ مهم: توجيه مسارات API إلى الدوال أولاً
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/:splat"
+  status = 200
+
+# ثم توجيه باقي الطلبات إلى index.html
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
 
-# رؤوس الأمان
 [[headers]]
   for = "/*"
   [headers.values]
