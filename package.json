@@ -1,0 +1,20 @@
+{
+  "name": "ali-app",
+  "version": "1.0.0",
+  "description": "متجر التطبيقات Ali App - منصة لعرض وتحميل التطبيقات",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev": "netlify dev",
+    "build": "echo 'No build step required'"
+  },
+  "dependencies": {
+    "@netlify/blobs": "^7.0.0",
+    "firebase": "^10.12.0"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "author": "Ali",
+  "license": "MIT"
+}
