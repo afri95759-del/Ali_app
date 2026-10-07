@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>لوحة التحكم - Ali App</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+</head>
+<body class="admin-body">
+
+  <aside class="sidebar">
+    <div class="logo">
+      <span class="logo-icon">📱</span>
+      <h1>Ali<span>App</span></h1>
+    </div>
+    <nav>
+      <a href="#add-app" class="active">➕ إضافة تطبيق</a>
+      <a href="#manage-apps">📋 إدارة التطبيقات</a>
+      <a href="#reviews">💬 التعليقات</a>
+      <a href="index.html">🏠 العودة للموقع</a>
+    </nav>
+  </aside>
+
+  <main class="admin-main">
+    <header class="admin-header">
+      <h2>لوحة التحكم</h2>
+      <button id="logoutBtn" class="btn btn-outline">تسجيل الخروج</button>
+    </header>
+
+    <section id="add-app" class="admin-section">
+      <h3>إضافة تطبيق جديد</h3>
+      <form id="addAppForm" class="admin-form">
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label>اسم التطبيق</label>
+            <input type="text" id="appName" required>
+          </div>
+          <div class="form-group">
+            <label>المطور</label>
+            <input type="text" id="appDeveloper" required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>الوصف</label>
+          <textarea id="appDescription" rows="4" required></textarea>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>الإصدار</label>
+            <input type="text" id="appVersion" placeholder="1.0.0">
+          </div>
+          <div class="form-group">
+            <label>الفئة</label>
+            <select id="appCategory">
+              <option>ألعاب</option>
+              <option>أدوات</option>
+              <option>اجتماعي</option>
+              <option>تعليمي</option>
+              <option>أخرى</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>أيقونة التطبيق</label>
+          <input type="file" id="appIcon" accept="image/*">
+        </div>
+
+        <div class="form-group">
+          <label>لقطات الشاشة</label>
+          <input type="file" id="appScreenshots" accept="image/*" multiple>
+        </div>
+
+        <div class="form-group">
+          <label>ملف APK</label>
+          <input type="file" id="appApk" accept=".apk">
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-lg">
+          💾 حفظ التطبيق
+        </button>
+        
+        <div id="uploadProgress" class="progress hidden">
+          <div class="progress-bar"></div>
+        </div>
+      </form>
+    </section>
+
+    <section id="manage-apps" class="admin-section hidden">
+      <h3>التطبيقات المضافة</h3>
+      <div id="appsList" class="apps-list"></div>
+    </section>
+
+    <section id="reviews" class="admin-section hidden">
+      <h3>التعليقات والتقييمات</h3>
+      <div id="reviewsList"></div>
+    </section>
+  </main>
+
+  <script type="module" src="js/admin.js"></script>
+</body>
+        </html>
