@@ -5,13 +5,13 @@
 [build.environment]
   NODE_VERSION = "20"
 
-# ⚠️ مهم: توجيه مسارات API إلى الدوال أولاً
+# ⚠️ ترتيب مهم جداً: توجيه API أولاً
 [[redirects]]
   from = "/api/*"
   to = "/.netlify/functions/:splat"
   status = 200
 
-# ثم توجيه باقي الطلبات إلى index.html
+# ثم توجيه الصفحات
 [[redirects]]
   from = "/*"
   to = "/index.html"
