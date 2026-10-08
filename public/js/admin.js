@@ -1,5 +1,5 @@
 // ============================================
-// Admin Panel Logic - Ali App
+// Admin Panel Logic - Ali App (ImgBB Version)
 // ============================================
 
 import { auth, db, ADMIN_EMAIL } from './firebase-config.js';
@@ -12,6 +12,9 @@ import {
   doc,
   serverTimestamp 
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+// 🔑 ImgBB API Key
+const IMGBB_API_KEY = "e655144c92c68c1b7d49cfa5bec6bd9d";
 
 // ============================================
 // حماية الصفحة (فقط للأدمن)
@@ -52,21 +55,24 @@ document.querySelectorAll('.sidebar nav a[href^="#"]').forEach(link => {
 });
 
 // ============================================
-// رفع ملف إلى Netlify Blobs
+// رفع صورة إلى ImgBB
 // ============================================
-async function uploadFile(file, type) {
+async function uploadImage(file) {
   const formData = new FormData();
-  formData.append('file', file);
-  formData.append('type', type);
+  formData.append('image', file);
   
-  const res = await fetch('/api/upload', {
+  const res = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, {
     method: 'POST',
     body: formData
   });
   
-  if (!res.ok) throw new Error('فشل رفع الملف');
   const data = await res.json();
-  return data.url;
+  
+  if (!data.success) {
+    throw new Error(data.error?.message || 'فشل رفع الصورة');
+  }
+  
+  return data.data.url;
 }
 
 // ============================================
@@ -83,13 +89,12 @@ document.getElementById('addAppForm').onsubmit = async (e) => {
   try {
     const iconFile = document.getElementById('appIcon').files[0];
     const screenshotFiles = document.getElementById('appScreenshots').files;
-    const apkFile = document.getElementById('appApk').files[0];
     
     // رفع الأيقونة
     let iconUrl = '';
     if (iconFile) {
       bar.style.width = '30%';
-      iconUrl = await uploadFile(iconFile, 'icon');
+      iconUrl = await uploadImage(iconFile);
     }
     
     // رفع لقطات الشاشة
@@ -97,16 +102,13 @@ document.getElementById('addAppForm').onsubmit = async (e) => {
     if (screenshotFiles.length > 0) {
       bar.style.width = '50%';
       for (const file of screenshotFiles) {
-        screenshots.push(await uploadFile(file, 'screenshot'));
+        screenshots.push(await uploadImage(file));
       }
     }
     
-    // رفع APK
+    // ⚠️ ملف APK - لن يتم رفعه حالياً
+    // سنستخدم رابطاً يدوياً في المستقبل
     let apkUrl = '';
-    if (apkFile) {
-      bar.style.width = '80%';
-      apkUrl = await uploadFile(apkFile, 'apk');
-    }
     
     // حفظ في Firestore
     bar.style.width = '95%';
