@@ -10,13 +10,12 @@ import {
   getDocs, 
   deleteDoc,
   doc,
-  updateDoc,
   serverTimestamp 
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 // 🔑 إعدادات Cloudinary
 const CLOUD_NAME = "k8qitjq0";
-const UPLOAD_PRESET = "ali_app_unsign";
+const UPLOAD_PRESET = "ali_app_unsigned";
 
 // ============================================
 // حماية الصفحة
@@ -77,7 +76,6 @@ async function uploadToCloudinary(file, resourceType = 'image') {
     throw new Error(data.error?.message || 'فشل رفع الملف');
   }
   
-  // إرجاع الرابط المباشر (بدون تحويلات إضافية للحفاظ على الملف الأصلي)
   return data.secure_url;
 }
 
@@ -169,16 +167,15 @@ async function loadAppsList() {
     snapshot.forEach(docSnap => {
       const app = docSnap.data();
       const item = document.createElement('div');
-      item.className = 'app-card';
-      item.style.cssText = 'display:flex; align-items:center; gap:16px; padding:16px; background:var(--bg-card); border-radius:14px; margin-bottom:12px; border:1.5px solid var(--border);';
+      item.style.cssText = 'display:flex; align-items:center; gap:16px; padding:16px; background:var(--bg-card); border-radius:14px; margin-bottom:12px; border:1.5px solid var(--border); flex-wrap:wrap;';
       item.innerHTML = `
         <img src="${app.iconUrl || 'https://via.placeholder.com/60'}" 
              style="width:60px; height:60px; border-radius:14px; object-fit:cover;">
-        <div style="flex:1;">
+        <div style="flex:1; min-width:150px;">
           <h3 style="margin-bottom:4px;">${app.name}</h3>
           <p style="color:var(--text-muted); font-size:13px;">${app.developer || 'غير معروف'} • ${app.category || ''}</p>
         </div>
-        <button class="btn btn-outline" onclick="deleteApp('${docSnap.id}')" style="background:rgba(239,68,68,.1); border-color:rgba(239,68,68,.3);">🗑️</button>
+        <button class="btn btn-outline" onclick="deleteApp('${docSnap.id}')" style="background:rgba(239,68,68,.1); border-color:rgba(239,68,68,.3);">🗑️ حذف</button>
       `;
       list.appendChild(item);
     });
