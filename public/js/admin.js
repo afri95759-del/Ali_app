@@ -1,5 +1,5 @@
 // ============================================
-// Admin Panel Logic - Ali App (ImgBB Version)
+// Admin Panel Logic - Ali App (Cloudinary)
 // ============================================
 
 import { auth, db, ADMIN_EMAIL } from './firebase-config.js';
@@ -10,14 +10,16 @@ import {
   getDocs, 
   deleteDoc,
   doc,
+  updateDoc,
   serverTimestamp 
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-// 🔑 ImgBB API Key
-const IMGBB_API_KEY = "e655144c92c68c1b7d49cfa5bec6bd9d";
+// 🔑 إعدادات Cloudinary
+const CLOUD_NAME = "k8qitjq0";
+const UPLOAD_PRESET = "ali_app_unsign";
 
 // ============================================
-// حماية الصفحة (فقط للأدمن)
+// حماية الصفحة
 // ============================================
 onAuthStateChanged(auth, (user) => {
   if (!user || user.email !== ADMIN_EMAIL) {
@@ -55,24 +57,28 @@ document.querySelectorAll('.sidebar nav a[href^="#"]').forEach(link => {
 });
 
 // ============================================
-// رفع صورة إلى ImgBB
+// رفع ملف إلى Cloudinary
 // ============================================
-async function uploadImage(file) {
+async function uploadToCloudinary(file, resourceType = 'image') {
   const formData = new FormData();
-  formData.append('image', file);
+  formData.append('file', file);
+  formData.append('upload_preset', UPLOAD_PRESET);
   
-  const res = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, {
+  const endpoint = `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/${resourceType}/upload`;
+  
+  const res = await fetch(endpoint, {
     method: 'POST',
     body: formData
   });
   
   const data = await res.json();
   
-  if (!data.success) {
-    throw new Error(data.error?.message || 'فشل رفع الصورة');
+  if (!res.ok || data.error) {
+    throw new Error(data.error?.message || 'فشل رفع الملف');
   }
   
-  return data.data.url;
+  // إرجاع الرابط المباشر (بدون تحويلات إضافية للحفاظ على الملف الأصلي)
+  return data.secure_url;
 }
 
 // ============================================
@@ -89,12 +95,13 @@ document.getElementById('addAppForm').onsubmit = async (e) => {
   try {
     const iconFile = document.getElementById('appIcon').files[0];
     const screenshotFiles = document.getElementById('appScreenshots').files;
+    const apkFile = document.getElementById('appApk')?.files[0];
     
     // رفع الأيقونة
     let iconUrl = '';
     if (iconFile) {
-      bar.style.width = '30%';
-      iconUrl = await uploadImage(iconFile);
+      bar.style.width = '25%';
+      iconUrl = await uploadToCloudinary(iconFile, 'image');
     }
     
     // رفع لقطات الشاشة
@@ -102,13 +109,16 @@ document.getElementById('addAppForm').onsubmit = async (e) => {
     if (screenshotFiles.length > 0) {
       bar.style.width = '50%';
       for (const file of screenshotFiles) {
-        screenshots.push(await uploadImage(file));
+        screenshots.push(await uploadToCloudinary(file, 'image'));
       }
     }
     
-    // ⚠️ ملف APK - لن يتم رفعه حالياً
-    // سنستخدم رابطاً يدوياً في المستقبل
+    // رفع APK (كنوع raw)
     let apkUrl = '';
+    if (apkFile) {
+      bar.style.width = '75%';
+      apkUrl = await uploadToCloudinary(apkFile, 'raw');
+    }
     
     // حفظ في Firestore
     bar.style.width = '95%';
@@ -160,17 +170,15 @@ async function loadAppsList() {
       const app = docSnap.data();
       const item = document.createElement('div');
       item.className = 'app-card';
-      item.style.display = 'flex';
-      item.style.alignItems = 'center';
-      item.style.gap = '16px';
+      item.style.cssText = 'display:flex; align-items:center; gap:16px; padding:16px; background:var(--bg-card); border-radius:14px; margin-bottom:12px; border:1.5px solid var(--border);';
       item.innerHTML = `
-        <img src="${app.iconUrl || 'https://via.placeholder.com/60/6366f1/ffffff?text=App'}" 
+        <img src="${app.iconUrl || 'https://via.placeholder.com/60'}" 
              style="width:60px; height:60px; border-radius:14px; object-fit:cover;">
         <div style="flex:1;">
-          <h3>${app.name}</h3>
-          <p style="color:var(--text-muted); font-size:13px;">${app.developer || 'غير معروف'}</p>
+          <h3 style="margin-bottom:4px;">${app.name}</h3>
+          <p style="color:var(--text-muted); font-size:13px;">${app.developer || 'غير معروف'} • ${app.category || ''}</p>
         </div>
-        <button class="btn btn-outline" onclick="deleteApp('${docSnap.id}')">🗑️ حذف</button>
+        <button class="btn btn-outline" onclick="deleteApp('${docSnap.id}')" style="background:rgba(239,68,68,.1); border-color:rgba(239,68,68,.3);">🗑️</button>
       `;
       list.appendChild(item);
     });
